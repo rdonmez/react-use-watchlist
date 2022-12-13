@@ -1,8 +1,8 @@
 import {
-  CartProvider,
-  createCartIdentifier,
+  WatchlistProvider,
+  createWatchlistIdentifier,
   initialState,
-  useCart,
+  useWatchlist,
 } from "../src";
 import React, { FC, HTMLAttributes, ReactChild } from "react";
 import { act, renderHook } from "@testing-library/react-hooks";
@@ -13,34 +13,34 @@ export interface Props extends HTMLAttributes<HTMLDivElement> {
 
 afterEach(() => window.localStorage.clear());
 
-describe("createCartIdentifier", () => {
+describe("createWatchlistIdentifier", () => {
   test("returns a 12 character string by default", () => {
-    const id = createCartIdentifier();
+    const id = createWatchlistIdentifier();
 
     expect(id).toHaveLength(12);
   });
 
   test("returns a custom length string", () => {
-    const id = createCartIdentifier(20);
+    const id = createWatchlistIdentifier(20);
 
     expect(id).toHaveLength(20);
   });
 
   test("created id is unique", () => {
-    const id = createCartIdentifier();
-    const id2 = createCartIdentifier();
+    const id = createWatchlistIdentifier();
+    const id2 = createWatchlistIdentifier();
 
     expect(id).not.toEqual(id2);
   });
 });
 
-describe("CartProvider", () => {
-  test("uses ID for cart if provided", () => {
+describe("WatchlistProvider", () => {
+  test("uses ID for Watchlist if provided", () => {
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider id="test">{children}</CartProvider>
+      <WatchlistProvider id="test">{children}</WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -48,18 +48,18 @@ describe("CartProvider", () => {
     expect(result.current.id).toEqual("test");
   });
 
-  test("creates an ID for cart if non provided", () => {
-    const { result } = renderHook(() => useCart(), {
-      wrapper: CartProvider,
+  test("creates an ID for Watchlist if non provided", () => {
+    const { result } = renderHook(() => useWatchlist(), {
+      wrapper: WatchlistProvider,
     });
 
     expect(result.current.id).toBeDefined();
     expect(result.current.id).toHaveLength(12);
   });
 
-  test("initial cart meta state is set", () => {
-    const { result } = renderHook(() => useCart(), {
-      wrapper: CartProvider,
+  test("initial Watchlist meta state is set", () => {
+    const { result } = renderHook(() => useWatchlist(), {
+      wrapper: WatchlistProvider,
     });
 
     expect(result.current.items).toEqual(initialState.items);
@@ -68,20 +68,20 @@ describe("CartProvider", () => {
       initialState.totalUniqueItems
     );
     expect(result.current.isEmpty).toBe(initialState.isEmpty);
-    expect(result.current.cartTotal).toEqual(initialState.cartTotal);
+    //expect(result.current.watchlistTotal).toEqual(initialState.WatchlistTotal);
   });
 
-  test("sets cart metadata", () => {
+  test("sets Watchlist metadata", () => {
     const metadata = {
       coupon: "abc123",
       notes: "Leave on door step",
     };
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider metadata={metadata}>{children}</CartProvider>
+      <WatchlistProvider metadata={metadata}>{children}</WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -90,9 +90,9 @@ describe("CartProvider", () => {
 });
 
 describe("addItem", () => {
-  test("adds item to the cart", () => {
-    const { result } = renderHook(() => useCart(), {
-      wrapper: CartProvider,
+  test("adds item to the Watchlist", () => {
+    const { result } = renderHook(() => useWatchlist(), {
+      wrapper: WatchlistProvider,
     });
 
     const item = { id: "test", price: 1000 };
@@ -104,9 +104,9 @@ describe("addItem", () => {
     expect(result.current.totalUniqueItems).toBe(1);
   });
 
-  test("increments existing item quantity in the cart", () => {
-    const { result } = renderHook(() => useCart(), {
-      wrapper: CartProvider,
+  test("increments existing item quantity in the Watchlist", () => {
+    const { result } = renderHook(() => useWatchlist(), {
+      wrapper: WatchlistProvider,
     });
 
     const item = { id: "test", price: 1000 };
@@ -120,9 +120,9 @@ describe("addItem", () => {
     expect(result.current.totalUniqueItems).toBe(1);
   });
 
-  test("updates cart meta state", () => {
-    const { result } = renderHook(() => useCart(), {
-      wrapper: CartProvider,
+  test("updates Watchlist meta state", () => {
+    const { result } = renderHook(() => useWatchlist(), {
+      wrapper: WatchlistProvider,
     });
 
     const item = { id: "test", price: 1000 };
@@ -132,13 +132,13 @@ describe("addItem", () => {
     expect(result.current.items).toHaveLength(1);
     expect(result.current.totalItems).toBe(1);
     expect(result.current.totalUniqueItems).toBe(1);
-    expect(result.current.cartTotal).toBe(1000);
+    //expect(result.current.WatchlistTotal).toBe(1000);
     expect(result.current.isEmpty).toBe(false);
   });
 
   test("allows free item", () => {
-    const { result } = renderHook(() => useCart(), {
-      wrapper: CartProvider,
+    const { result } = renderHook(() => useWatchlist(), {
+      wrapper: WatchlistProvider,
     });
 
     const item = { id: "test", price: 0 };
@@ -148,18 +148,18 @@ describe("addItem", () => {
     expect(result.current.items).toHaveLength(1);
     expect(result.current.totalItems).toBe(1);
     expect(result.current.totalUniqueItems).toBe(1);
-    expect(result.current.cartTotal).toBe(0);
+    //expect(result.current.WatchlistTotal).toBe(0);
     expect(result.current.isEmpty).toBe(false);
   });
 
-  test("triggers onItemAdd when cart empty", () => {
+  test("triggers onItemAdd when Watchlist empty", () => {
     let called = false;
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider onItemAdd={() => (called = true)}>{children}</CartProvider>
+      <WatchlistProvider onItemAdd={() => (called = true)}>{children}</WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -170,18 +170,18 @@ describe("addItem", () => {
     expect(called).toBe(true);
   });
 
-  test("triggers onItemUpdate when cart has existing item", () => {
+  test("triggers onItemUpdate when Watchlist has existing item", () => {
     let called = false;
 
     const item = { id: "test", price: 1000 };
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider defaultItems={[item]} onItemUpdate={() => (called = true)}>
+      <WatchlistProvider defaultItems={[item]} onItemUpdate={() => (called = true)}>
         {children}
-      </CartProvider>
+      </WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -191,28 +191,28 @@ describe("addItem", () => {
   });
 
   test("add item with price", () => {
-    const { result } = renderHook(() => useCart(), {
-      wrapper: CartProvider,
+    const { result } = renderHook(() => useWatchlist(), {
+      wrapper: WatchlistProvider,
     });
 
     const item = { id: "test", price: 1000 };
 
     act(() => result.current.addItem(item));
 
-    expect(result.current.cartTotal).toBe(1000);
+    //expect(result.current.WatchlistTotal).toBe(1000);
   });
 });
 
 describe("updateItem", () => {
-  test("updates cart meta state", () => {
+  test("updates Watchlist meta state", () => {
     const items = [{ id: "test", price: 1000 }];
     const [item] = items;
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider defaultItems={items}>{children}</CartProvider>
+      <WatchlistProvider defaultItems={items}>{children}</WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -234,12 +234,12 @@ describe("updateItem", () => {
     const item = { id: "test", price: 1000 };
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider defaultItems={[item]} onItemUpdate={() => (called = true)}>
+      <WatchlistProvider defaultItems={[item]} onItemUpdate={() => (called = true)}>
         {children}
-      </CartProvider>
+      </WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -250,15 +250,15 @@ describe("updateItem", () => {
 });
 
 describe("updateItemQuantity", () => {
-  test("updates cart meta state", () => {
+  test("updates Watchlist meta state", () => {
     const items = [{ id: "test", price: 1000 }];
     const [item] = items;
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider defaultItems={items}>{children}</CartProvider>
+      <WatchlistProvider defaultItems={items}>{children}</WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -276,12 +276,12 @@ describe("updateItemQuantity", () => {
     const item = { id: "test", price: 1000 };
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider defaultItems={[item]} onItemUpdate={() => (called = true)}>
+      <WatchlistProvider defaultItems={[item]} onItemUpdate={() => (called = true)}>
         {children}
-      </CartProvider>
+      </WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -297,12 +297,12 @@ describe("updateItemQuantity", () => {
     const item = { id: "test", price: 1000 };
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider defaultItems={[item]} onItemRemove={() => (called = true)}>
+      <WatchlistProvider defaultItems={[item]} onItemRemove={() => (called = true)}>
         {children}
-      </CartProvider>
+      </WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -315,8 +315,8 @@ describe("updateItemQuantity", () => {
   test("recalculates itemTotal when incrementing item quantity", () => {
     const item = { id: "test", price: 1000 };
 
-    const { result } = renderHook(() => useCart(), {
-      wrapper: CartProvider,
+    const { result } = renderHook(() => useWatchlist(), {
+      wrapper: WatchlistProvider,
     });
 
     act(() => result.current.addItem(item));
@@ -331,8 +331,8 @@ describe("updateItemQuantity", () => {
   test("recalculates itemTotal when decrementing item quantity", () => {
     const item = { id: "test", price: 1000, quantity: 2 };
 
-    const { result } = renderHook(() => useCart(), {
-      wrapper: CartProvider,
+    const { result } = renderHook(() => useWatchlist(), {
+      wrapper: WatchlistProvider,
     });
 
     act(() => result.current.addItem(item));
@@ -346,15 +346,15 @@ describe("updateItemQuantity", () => {
 });
 
 describe("removeItem", () => {
-  test("updates cart meta state", () => {
+  test("updates Watchlist meta state", () => {
     const items = [{ id: "test", price: 1000 }];
     const [item] = items;
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider defaultItems={items}>{children}</CartProvider>
+      <WatchlistProvider defaultItems={items}>{children}</WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -372,12 +372,12 @@ describe("removeItem", () => {
     const item = { id: "test", price: 1000 };
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider defaultItems={[item]} onItemRemove={() => (called = true)}>
+      <WatchlistProvider defaultItems={[item]} onItemRemove={() => (called = true)}>
         {children}
-      </CartProvider>
+      </WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -387,19 +387,19 @@ describe("removeItem", () => {
   });
 });
 
-describe("emptyCart", () => {
-  test("updates cart meta state", () => {
+describe("emptyWatchlist", () => {
+  test("updates Watchlist meta state", () => {
     const items = [{ id: "test", price: 1000 }];
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider defaultItems={items}>{children}</CartProvider>
+      <WatchlistProvider defaultItems={items}>{children}</WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
-    act(() => result.current.emptyCart());
+    act(() => result.current.emptyWatchlist());
 
     expect(result.current.items).toEqual([]);
     expect(result.current.totalItems).toBe(0);
@@ -408,10 +408,10 @@ describe("emptyCart", () => {
   });
 });
 
-describe("updateCartMetadata", () => {
-  test("clears cart metadata", () => {
-    const { result } = renderHook(() => useCart(), {
-      wrapper: CartProvider,
+describe("updateWatchlistMetadata", () => {
+  test("clears Watchlist metadata", () => {
+    const { result } = renderHook(() => useWatchlist(), {
+      wrapper: WatchlistProvider,
     });
 
     const metadata = {
@@ -419,18 +419,18 @@ describe("updateCartMetadata", () => {
       notes: "Leave on door step",
     };
 
-    act(() => result.current.updateCartMetadata(metadata));
+    act(() => result.current.updateWatchlistMetadata(metadata));
 
     expect(result.current.metadata).toEqual(metadata);
 
-    act(() => result.current.clearCartMetadata());
+    act(() => result.current.clearWatchlistMetadata());
 
     expect(result.current.metadata).toEqual({});
   });
 
-  test("sets cart metadata", () => {
-    const { result } = renderHook(() => useCart(), {
-      wrapper: CartProvider,
+  test("sets Watchlist metadata", () => {
+    const { result } = renderHook(() => useWatchlist(), {
+      wrapper: WatchlistProvider,
     });
 
     const metadata = {
@@ -438,7 +438,7 @@ describe("updateCartMetadata", () => {
       notes: "Leave on door step",
     };
 
-    act(() => result.current.updateCartMetadata(metadata));
+    act(() => result.current.updateWatchlistMetadata(metadata));
 
     expect(result.current.metadata).toEqual(metadata);
 
@@ -446,14 +446,14 @@ describe("updateCartMetadata", () => {
       delivery: "same-day",
     };
 
-    act(() => result.current.setCartMetadata(replaceMetadata));
+    act(() => result.current.setWatchlistMetadata(replaceMetadata));
 
     expect(result.current.metadata).toEqual(replaceMetadata);
   });
 
-  test("updates cart metadata", () => {
-    const { result } = renderHook(() => useCart(), {
-      wrapper: CartProvider,
+  test("updates Watchlist metadata", () => {
+    const { result } = renderHook(() => useWatchlist(), {
+      wrapper: WatchlistProvider,
     });
 
     const metadata = {
@@ -461,7 +461,7 @@ describe("updateCartMetadata", () => {
       notes: "Leave on door step",
     };
 
-    act(() => result.current.updateCartMetadata(metadata));
+    act(() => result.current.updateWatchlistMetadata(metadata));
 
     expect(result.current.metadata).toEqual(metadata);
   });
@@ -472,10 +472,10 @@ describe("updateCartMetadata", () => {
     };
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider metadata={initialMetadata}>{children}</CartProvider>
+      <WatchlistProvider metadata={initialMetadata}>{children}</WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -483,7 +483,7 @@ describe("updateCartMetadata", () => {
       notes: "Leave on door step",
     };
 
-    act(() => result.current.updateCartMetadata(metadata));
+    act(() => result.current.updateWatchlistMetadata(metadata));
 
     expect(result.current.metadata).toEqual({
       ...initialMetadata,
@@ -492,16 +492,16 @@ describe("updateCartMetadata", () => {
   });
 });
 describe("setItems", () => {
-  test("set cart items state", () => {
+  test("set Watchlist items state", () => {
     const items = [
       { id: "test", price: 1000 },
       { id: "test2", price: 2000 },
     ];
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider defaultItems={[]}>{children}</CartProvider>
+      <WatchlistProvider defaultItems={[]}>{children}</WatchlistProvider>
     );
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -520,9 +520,9 @@ describe("setItems", () => {
       { id: "test2", price: 2000, quantity: 1 },
     ];
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider defaultItems={[]}>{children}</CartProvider>
+      <WatchlistProvider defaultItems={[]}>{children}</WatchlistProvider>
     );
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 
@@ -534,9 +534,9 @@ describe("setItems", () => {
   test("current items is replaced when setItems has been called with a new set of items", () => {
     const itemToBeReplaced = { id: "test", price: 1000 };
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider defaultItems={[itemToBeReplaced]}>{children}</CartProvider>
+      <WatchlistProvider defaultItems={[itemToBeReplaced]}>{children}</WatchlistProvider>
     );
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
     const items = [
@@ -553,10 +553,10 @@ describe("setItems", () => {
     let called = false;
 
     const wrapper: FC<Props> = ({ children }) => (
-      <CartProvider onSetItems={() => (called = true)}>{children}</CartProvider>
+      <WatchlistProvider onSetItems={() => (called = true)}>{children}</WatchlistProvider>
     );
 
-    const { result } = renderHook(() => useCart(), {
+    const { result } = renderHook(() => useWatchlist(), {
       wrapper,
     });
 

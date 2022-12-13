@@ -16,7 +16,7 @@ interface InitialState {
   isEmpty: boolean;
   totalItems: number;
   totalUniqueItems: number;
-  cartTotal: number;
+  //cartTotal: number;
   metadata?: Metadata;
 }
 
@@ -24,18 +24,18 @@ export interface Metadata {
   [key: string]: any;
 }
 
-interface CartProviderState extends InitialState {
+interface WatchlistProviderState extends InitialState {
   addItem: (item: Item, quantity?: number) => void;
   removeItem: (id: Item["id"]) => void;
   updateItem: (id: Item["id"], payload: object) => void;
   setItems: (items: Item[]) => void;
   updateItemQuantity: (id: Item["id"], quantity: number) => void;
-  emptyCart: () => void;
+  emptyWatchlist: () => void;
   getItem: (id: Item["id"]) => any | undefined;
-  inCart: (id: Item["id"]) => boolean;
-  clearCartMetadata: () => void;
-  setCartMetadata: (metadata: Metadata) => void;
-  updateCartMetadata: (metadata: Metadata) => void;
+  inWatchlist: (id: Item["id"]) => boolean;
+  clearWatchlistMetadata: () => void;
+  setWatchlistMetadata: (metadata: Metadata) => void;
+  updateWatchlistMetadata: (metadata: Metadata) => void;
 }
 
 export type Actions =
@@ -47,44 +47,44 @@ export type Actions =
       id: Item["id"];
       payload: object;
     }
-  | { type: "EMPTY_CART" }
-  | { type: "CLEAR_CART_META" }
-  | { type: "SET_CART_META"; payload: Metadata }
-  | { type: "UPDATE_CART_META"; payload: Metadata };
+  | { type: "EMPTY_WATCHLIST" }
+  | { type: "CLEAR_WATCHLIST_META" }
+  | { type: "SET_WATCHLIST_META"; payload: Metadata }
+  | { type: "UPDATE_WATCHLIST_META"; payload: Metadata };
 
 export const initialState: any = {
   items: [],
   isEmpty: true,
   totalItems: 0,
   totalUniqueItems: 0,
-  cartTotal: 0,
+  //cartTotal: 0,
   metadata: {},
 };
 
-const CartContext = React.createContext<CartProviderState | undefined>(
+const WatchlistContext = React.createContext<WatchlistProviderState | undefined>(
   initialState
 );
 
-export const createCartIdentifier = (len = 12) =>
+export const createWatchlistIdentifier = (len = 12) =>
   [...Array(len)].map(() => (~~(Math.random() * 36)).toString(36)).join("");
 
-export const useCart = () => {
-  const context = React.useContext(CartContext);
+export const useWatchlist = () => {
+  const context = React.useContext(WatchlistContext);
 
-  if (!context) throw new Error("Expected to be wrapped in a CartProvider");
+  if (!context) throw new Error("Expected to be wrapped in a WatchlistProvider");
 
   return context;
 };
 
-function reducer(state: CartProviderState, action: Actions) {
+function reducer(state: WatchlistProviderState, action: Actions) {
   switch (action.type) {
     case "SET_ITEMS":
-      return generateCartState(state, action.payload);
+      return generateWatchlistState(state, action.payload);
 
     case "ADD_ITEM": {
       const items = [...state.items, action.payload];
 
-      return generateCartState(state, items);
+      return generateWatchlistState(state, items);
     }
 
     case "UPDATE_ITEM": {
@@ -97,25 +97,25 @@ function reducer(state: CartProviderState, action: Actions) {
         };
       });
 
-      return generateCartState(state, items);
+      return generateWatchlistState(state, items);
     }
 
     case "REMOVE_ITEM": {
       const items = state.items.filter((i: Item) => i.id !== action.id);
 
-      return generateCartState(state, items);
+      return generateWatchlistState(state, items);
     }
 
-    case "EMPTY_CART":
+    case "EMPTY_WATCHLIST":
       return initialState;
 
-    case "CLEAR_CART_META":
+    case "CLEAR_WATCHLIST_META":
       return {
         ...state,
         metadata: {},
       };
 
-    case "SET_CART_META":
+    case "SET_WATCHLIST_META":
       return {
         ...state,
         metadata: {
@@ -123,7 +123,7 @@ function reducer(state: CartProviderState, action: Actions) {
         },
       };
 
-    case "UPDATE_CART_META":
+    case "UPDATE_WATCHLIST_META":
       return {
         ...state,
         metadata: {
@@ -137,7 +137,7 @@ function reducer(state: CartProviderState, action: Actions) {
   }
 }
 
-const generateCartState = (state = initialState, items: Item[]) => {
+const generateWatchlistState = (state = initialState, items: Item[]) => {
   const totalUniqueItems = calculateUniqueItems(items);
   const isEmpty = totalUniqueItems === 0;
 
@@ -147,7 +147,7 @@ const generateCartState = (state = initialState, items: Item[]) => {
     items: calculateItemTotals(items),
     totalItems: calculateTotalItems(items),
     totalUniqueItems,
-    cartTotal: calculateTotal(items),
+    //cartTotal: calculateTotal(items),
     isEmpty,
   };
 };
@@ -158,15 +158,15 @@ const calculateItemTotals = (items: Item[]) =>
     itemTotal: item.price * item.quantity!,
   }));
 
-const calculateTotal = (items: Item[]) =>
-  items.reduce((total, item) => total + item.quantity! * item.price, 0);
+//const calculateTotal = (items: Item[]) =>
+  //items.reduce((total, item) => total + item.quantity! * item.price, 0);
 
 const calculateTotalItems = (items: Item[]) =>
   items.reduce((sum, item) => sum + item.quantity!, 0);
 
 const calculateUniqueItems = (items: Item[]) => items.length;
 
-export const CartProvider: React.FC<{
+export const WatchlistProvider: React.FC<{
   children?: React.ReactNode;
   id?: string;
   defaultItems?: Item[];
@@ -181,7 +181,7 @@ export const CartProvider: React.FC<{
   metadata?: Metadata;
 }> = ({
   children,
-  id: cartId,
+  id: watchlistId,
   defaultItems = [],
   onSetItems,
   onItemAdd,
@@ -190,10 +190,10 @@ export const CartProvider: React.FC<{
   storage = useLocalStorage,
   metadata,
 }) => {
-  const id = cartId ? cartId : createCartIdentifier();
+  const id = watchlistId ? watchlistId : createWatchlistIdentifier();
 
-  const [savedCart, saveCart] = storage(
-    cartId ? `react-use-cart-${id}` : `react-use-cart`,
+  const [savedWatchlist, saveWatchlist] = storage(
+    watchlistId ? `react-use-watchlist-${id}` : `react-use-watchlist`,
     JSON.stringify({
       id,
       ...initialState,
@@ -202,10 +202,10 @@ export const CartProvider: React.FC<{
     })
   );
 
-  const [state, dispatch] = React.useReducer(reducer, JSON.parse(savedCart));
+  const [state, dispatch] = React.useReducer(reducer, JSON.parse(savedWatchlist));
   React.useEffect(() => {
-    saveCart(JSON.stringify(state));
-  }, [state, saveCart]);
+    saveWatchlist(JSON.stringify(state));
+  }, [state, saveWatchlist]);
 
   const setItems = (items: Item[]) => {
     dispatch({
@@ -221,12 +221,12 @@ export const CartProvider: React.FC<{
 
   const addItem = (item: Item, quantity = 1) => {
     if (!item.id) throw new Error("You must provide an `id` for items");
-    if (quantity <= 0) return;
+    //if (quantity <= 0) return;
 
     const currentItem = state.items.find((i: Item) => i.id === item.id);
 
-    if (!currentItem && !item.hasOwnProperty("price"))
-      throw new Error("You must pass a `price` for new items");
+    //if (!currentItem && !item.hasOwnProperty("price"))
+      //throw new Error("You must pass a `price` for new items");
 
     if (!currentItem) {
       const payload = { ...item, quantity };
@@ -291,58 +291,58 @@ export const CartProvider: React.FC<{
     onItemRemove && onItemRemove(id);
   };
 
-  const emptyCart = () =>
+  const emptyWatchlist = () =>
     dispatch({
-      type: "EMPTY_CART",
+      type: "EMPTY_WATCHLIST",
     });
 
   const getItem = (id: Item["id"]) =>
     state.items.find((i: Item) => i.id === id);
 
-  const inCart = (id: Item["id"]) => state.items.some((i: Item) => i.id === id);
+  const inWatchlist = (id: Item["id"]) => state.items.some((i: Item) => i.id === id);
 
-  const clearCartMetadata = () => {
+  const clearWatchlistMetadata = () => {
     dispatch({
-      type: "CLEAR_CART_META",
+      type: "CLEAR_WATCHLIST_META",
     });
   };
 
-  const setCartMetadata = (metadata: Metadata) => {
+  const setWatchlistMetadata = (metadata: Metadata) => {
     if (!metadata) return;
 
     dispatch({
-      type: "SET_CART_META",
+      type: "SET_WATCHLIST_META",
       payload: metadata,
     });
   };
 
-  const updateCartMetadata = (metadata: Metadata) => {
+  const updateWatchlistMetadata = (metadata: Metadata) => {
     if (!metadata) return;
 
     dispatch({
-      type: "UPDATE_CART_META",
+      type: "UPDATE_WATCHLIST_META",
       payload: metadata,
     });
   };
 
   return (
-    <CartContext.Provider
+    <WatchlistContext.Provider
       value={{
         ...state,
         getItem,
-        inCart,
+        inWatchlist,
         setItems,
         addItem,
         updateItem,
         updateItemQuantity,
         removeItem,
-        emptyCart,
-        clearCartMetadata,
-        setCartMetadata,
-        updateCartMetadata,
+        emptyWatchlist,
+        clearWatchlistMetadata,
+        setWatchlistMetadata,
+        updateWatchlistMetadata,
       }}
     >
       {children}
-    </CartContext.Provider>
+    </WatchlistContext.Provider>
   );
 };

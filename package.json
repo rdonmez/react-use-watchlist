@@ -1,13 +1,13 @@
 {
-  "name": "react-use-cart",
-  "version": "0.0.0-semantic-release",
-  "description": "React hook library for managing cart state.",
+  "name": "react-use-watchlist",
+  "version": "0.0.1-semantic-release",
+  "description": "React hook library for managing watchlist state.",
   "author": "Jamie Barton <jamie@notrab.dev> (https://twitter.com/notrab)",
   "license": "Apache-2.0",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
-  "module": "dist/react-use-cart.esm.js",
-  "repository": "notrab/react-use-cart",
+  "module": "dist/react-use-watchlist.esm.js",
+  "repository": "rdonmez/react-use-watchlist",
   "files": [
     "dist",
     "src"
@@ -16,7 +16,7 @@
     "react",
     "commerce",
     "ecommerce",
-    "cart",
+    "watchlist",
     "hooks"
   ],
   "engines": {
